@@ -67,7 +67,7 @@ true;
 false;
 #endif
         public bool IsUserDebug = false;
-        public string Version = "v1.7";
+        public string Version = "v1.7.comet1";
 
         private sealed record FunctionSignature(string Name, List<string> Parameters, List<string> ReturnValues, string SourceAssetRelativePath);
         private sealed record ExternalCallSignature(string Name, int ParameterCount, bool IncludeTargetPin, string? RepresentativeTemplateJson, string? RepresentativeExpressionType, List<NodeReferenceDescriptor> ReferenceDescriptors, string? SourceAssetRelativePath);
@@ -2787,6 +2787,10 @@ false;
             JsonObject expressionObj,
             string slotPinName)
         {
+            string expressionType = SimplifyExpressionType(expressionObj["$type"]?.GetValue<string>() ?? string.Empty);
+            if (expressionType == "ArrayGetByRef") 
+                return false;
+
             if (TryMapSlotPinToDeclaredInputPin(node, slotPinName, out _))
                 return true;
 
@@ -2803,8 +2807,8 @@ false;
                 return true;
             }
 
-            string expressionType = SimplifyExpressionType(expressionObj["$type"]?.GetValue<string>() ?? string.Empty);
-            if (!TryResolveCallFunctionName(expressionObj, expressionType, out string functionName))
+            string exprType = SimplifyExpressionType(expressionObj["$type"]?.GetValue<string>() ?? string.Empty);
+            if (!TryResolveCallFunctionName(expressionObj, exprType, out string functionName))
                 return false;
 
             if (TryMapArgumentPinToParameterPin(functionName, slotPinName, out string parameterPinName))
@@ -4132,6 +4136,8 @@ false;
             foreach ((string key, JsonNode? value) in expressionObj)
             {
                 if (key == "$type" || value == null) continue;
+
+                if (key == "Expression") continue;
 
                 if (value is JsonObject childObject && IsExpressionObject(childObject))
                 {
