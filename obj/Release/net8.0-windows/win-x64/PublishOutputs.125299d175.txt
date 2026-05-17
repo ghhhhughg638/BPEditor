@@ -1,0 +1,2 @@
+E:\BPEditor\publish\UAssetAPI.xml
+E:\BPEditor\publish\BPEditor.exe

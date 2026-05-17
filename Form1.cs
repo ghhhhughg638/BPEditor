@@ -2782,15 +2782,23 @@ false;
             return false;
         }
 
-        private bool ShouldManageUserChildSlot(
-            SerializableNode node,
-            JsonObject expressionObj,
-            string slotPinName)
+        private bool ShouldManageUserChildSlot(SerializableNode node, JsonObject expressionObj, string slotPinName)
         {
             string expressionType = SimplifyExpressionType(expressionObj["$type"]?.GetValue<string>() ?? string.Empty);
-            if (expressionType == "ArrayGetByRef") 
-                return false;
-
+            
+            // 🔧 精确修复：只跳过 EX_Let 中指向 ArrayGetByRef 的 Expression
+            if (expressionType == "Let" && slotPinName == "Expression")
+            {
+                if (expressionObj["Expression"] is JsonObject exprObj)
+                {
+                    string innerType = SimplifyExpressionType(exprObj["$type"]?.GetValue<string>() ?? string.Empty);
+                    if (innerType == "ArrayGetByRef")
+                    {
+                        return false;
+                    }
+                }
+            }
+            
             if (TryMapSlotPinToDeclaredInputPin(node, slotPinName, out _))
                 return true;
 
@@ -4133,11 +4141,24 @@ false;
 
         private IEnumerable<ExpressionChildSlot> CollectChildExpressionSlotsCore(JsonObject expressionObj)
         {
+            string parentType = SimplifyExpressionType(expressionObj["$type"]?.GetValue<string>() ?? string.Empty);
+
             foreach ((string key, JsonNode? value) in expressionObj)
             {
                 if (key == "$type" || value == null) continue;
 
-                if (key == "Expression") continue;
+                // 🔧 精确修复：只跳过 EX_Let 中指向 ArrayGetByRef 的 Expression
+                if (key == "Expression" && parentType == "Let")
+                {
+                    if (value is JsonObject exprObj)
+                    {
+                        string innerType = SimplifyExpressionType(exprObj["$type"]?.GetValue<string>() ?? string.Empty);
+                        if (innerType == "ArrayGetByRef")
+                        {
+                            continue;
+                        }
+                    }
+                }
 
                 if (value is JsonObject childObject && IsExpressionObject(childObject))
                 {
