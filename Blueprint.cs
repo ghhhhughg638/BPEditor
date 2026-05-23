@@ -232,15 +232,63 @@ public class BlueprintNode : UserControl
         }
 
         DrawEditorValue(g);
-
+        
+        bool l = false;
+        if (l == true)
+        {
         // 绘制引脚
-        foreach (var pin in InputPins)
-            DrawPin(g, pin, pin.Name, true);
-        foreach (var pin in OutputPins)
-            DrawPin(g, pin, pin.Name, false);
+            foreach (var pin in InputPins)
+                if (pin.Name == "In")DrawPin(g, pin, "入口In", true);
+                else if (pin.Name == "Target")DrawPin(g, pin, "目标Target", true);
+                else if (pin.Name == "callerCard")DrawPin(g, pin, "卡牌调用者callerCard", true);
+                else if (pin.Name == "hasTarget")DrawPin(g, pin, "目标存在(Bool)hasTarget", true);
+                else if (pin.Name == "card")DrawPin(g, pin, "对象card", true);
+                else if (pin.Name == "Condition")DrawPin(g, pin, "条件(Bool)Condition", true);
+                else if (pin.Name == "Value")DrawPin(g, pin, "值Value", true);
+                else if (pin.Name == "Return")DrawPin(g, pin, "返回Return", true);
 
+                else if (pin.Name == "Arg1")DrawPin(g, pin, "参数Arg1", true);
+                else if (pin.Name == "Arg2")DrawPin(g, pin, "参数Arg2", true);
+                else if (pin.Name == "Arg3")DrawPin(g, pin, "参数Arg3", true);
+                else if (pin.Name == "Arg4")DrawPin(g, pin, "参数Arg4", true);
+                else if (pin.Name == "Arg5")DrawPin(g, pin, "参数Arg5", true);
+                else if (pin.Name == "Arg6")DrawPin(g, pin, "参数Arg6", true);
+                else if (pin.Name == "Arg7")DrawPin(g, pin, "参数Arg7", true);
+                else if (pin.Name == "Arg8")DrawPin(g, pin, "参数Arg8", true);
+                else if (pin.Name == "Arg9")DrawPin(g, pin, "参数Arg9", true);
+                else if (pin.Name == "Arg10")DrawPin(g, pin, "参数Arg10", true);
+
+
+                else
+                {
+                    DrawPin(g, pin, pin.Name, true);
+                }
+                
+            foreach (var pin in OutputPins)
+                if (pin.Name == "Out")DrawPin(g, pin, "出口Out", false);
+                else if (pin.Name == "To")DrawPin(g, pin, "跳转To", false);
+                else if (pin.Name == "Result")DrawPin(g, pin, "结果Result", false);
+                else if (pin.Name == "Value")DrawPin(g, pin, "值Value", false);
+                else if (pin.Name == "Exec")DrawPin(g, pin, "执行Exec", false);
+                else if (pin.Name == "canIt")DrawPin(g, pin, "canIt条件", false);
+                else if (pin.Name == "reason")DrawPin(g, pin, "reason原因", false);
+
+                else
+                    {
+                        DrawPin(g, pin, pin.Name, false);
+                    }
+        }
+        else
+        {
+            foreach (var pin in InputPins)
+                DrawPin(g, pin, pin.Name, true);
+            foreach (var pin in OutputPins)
+                DrawPin(g, pin, pin.Name, false);
+        }
         DrawStatementOffset(g);
     }
+
+
 
     private void DrawEditorValue(Graphics g)
     {

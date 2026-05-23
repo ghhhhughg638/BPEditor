@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BPEditor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9275447c7d57287916efab17d64b806b931c4e05")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+03640e4460636eba68abba215f6c85470bc0ca23")]
 [assembly: System.Reflection.AssemblyProductAttribute("BPEditor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BPEditor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

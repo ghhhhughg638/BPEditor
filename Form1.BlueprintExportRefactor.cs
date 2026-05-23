@@ -1945,6 +1945,24 @@ namespace BPEditor
             }
         }
 
+                /// <summary>
+        /// 检查 FFieldPath 的 Path 数组是否真正为空（没有有效字段名）
+        /// </summary>
+        private static bool IsFieldPathTrulyEmpty(JsonObject fieldPathObject)
+        {
+            JsonArray? pathArray = fieldPathObject["Path"] as JsonArray;
+            if (pathArray == null || pathArray.Count == 0)
+                return true;
+            
+            // 检查是否所有元素都是空字符串
+            foreach (JsonNode? item in pathArray)
+            {
+                string? value = item?.GetValue<string>();
+                if (!string.IsNullOrWhiteSpace(value))
+                    return false;
+            }
+            return true;
+        }
         private void NormalizeAndValidateFieldPointer(
             JsonObject fieldPathObject,
             FieldOwnerResolutionContext context,
@@ -1955,18 +1973,29 @@ namespace BPEditor
             string fieldName = ExtractFieldPathLeafName(fieldPathObject);
             int actualOwner = fieldPathObject["ResolvedOwner"]?.GetValue<int>() ?? 0;
 
+            // 检查是否为真正空的 Path 数组
+            bool isTrulyEmptyPath = IsFieldPathTrulyEmpty(fieldPathObject);
+
             if (string.IsNullOrWhiteSpace(fieldName))
             {
                 bool allowEmptyPointer = IsAllowedEmptyFieldPointer(pointerPath, currentExpressionType);
                 if (allowEmptyPointer)
                 {
-                    if (actualOwner != 0)
+                    // 🔧 修复：空字段指针的 owner 必须为 0，自动修正
+                    if (actualOwner != 0 && isTrulyEmptyPath)
+                    {
+                        fieldPathObject["ResolvedOwner"] = 0;
+                        // 可选：记录调试信息，不中断保存
+                        // System.Diagnostics.Debug.WriteLine($"Fixed empty field pointer at {pointerPath}");
+                    }
+                    // 路径非空但解析失败 → 应该报错
+                    else if (!isTrulyEmptyPath && actualOwner != 0)
                     {
                         validationErrors.Add(
-                            $"Empty field pointer at {pointerPath} in {currentExpressionType} must use owner 0, but found {actualOwner}.");
+                            $"Field path has content but could not extract field name at {pointerPath} in {currentExpressionType}.");
                     }
                 }
-                else
+                else if (!allowEmptyPointer)
                 {
                     validationErrors.Add(
                         $"Unresolved empty field pointer at {pointerPath} in {currentExpressionType}.");
@@ -1974,6 +2003,7 @@ namespace BPEditor
                 return;
             }
 
+            // 以下是原有逻辑：有字段名时的正常处理
             int expectedOwner = ResolveExpectedFieldOwnerIndex(context, fieldName, actualOwner, currentExpressionType, pointerPath);
             if (expectedOwner != 0)
             {
